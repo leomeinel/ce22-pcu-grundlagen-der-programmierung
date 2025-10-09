@@ -9,8 +9,12 @@
  */
 
 #include <cstdio>
+#include <iostream>
 
 int main(int argc, char *argv[]) {
+  // Using C std
   std::printf("Hello World\n");
+  // Using C++ std
+  std::cout << "Hello World\n";
   return 0;
 }
