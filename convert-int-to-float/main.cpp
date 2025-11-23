@@ -33,9 +33,10 @@ int main(int argc, char *argv[]) {
   std::cout << "Integer to convert: ";
   std::cin >> convert_from;
 
-  std::string expected_types[] = {"float"s, "f.*"s, "double"s, "d.*"s};
+  constexpr std::string_view expected_types[] = {"float", "f.*", "double",
+                                                 "d.*"};
   std::cout << "\n" << "Valid target types: " << "\n";
-  for (std::string type : expected_types) {
+  for (std::string_view type : expected_types) {
     std::cout << "\t" << type << "\n";
   }
   std::string choice;
