@@ -9,7 +9,10 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Add executable and specify sources
+# Set optimizations
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+
+# Set target and sources
 set(SOURCES
     src/main.cpp
     src/actions.cpp
@@ -17,10 +20,21 @@ set(SOURCES
     src/states.cpp
     include/program.hpp
 )
-add_executable(archiver.out ${SOURCES})
 
-# Specifies required features for compiling
-target_compile_features(archiver.out PRIVATE cxx_std_23)
+# Add executable
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+# Specify required features for compiling
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
 
 # Add include directories
-target_include_directories(archiver.out PRIVATE include)
+target_include_directories(${PROJECT_NAME} PRIVATE include)
+
+# Specify optimization options
+target_compile_options(${PROJECT_NAME} PRIVATE -march=native)
+
+add_custom_command(
+  TARGET "${PROJECT_NAME}" POST_BUILD
+  COMMAND $<$<CONFIG:release>:${CMAKE_STRIP}>
+  ARGS -s $<TARGET_FILE:${PROJECT_NAME}>
+)
