@@ -7,11 +7,8 @@
  * URL: https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#include <cstdlib>
 #include <filesystem>
-#include <format>
 #include <iostream>
-#include <stdexcept>
 #include <utility>
 
 namespace fs = std::filesystem;
@@ -43,20 +40,6 @@ constexpr std::string_view HELP_TEMPLATE =
     " -h                      Display usage and exit.\n";
 
 /**
- * @brief Template for parameter output.
- *
- * This is meant to help the user understand how their given parameters were
- * interpreted.
- *
- */
-constexpr std::string_view PARAMETER_TEMPLATE =
-    "  -c, --create:            {}\n"
-    "  -x, --extract, --get:    {}\n"
-    "  -f, --force:             {}\n"
-    "  [-i INPUT]:              {}\n"
-    "  [-o OUTPUT]:             {}\n";
-
-/**
  * @brief States for execution flow.
  *
  */
@@ -73,43 +56,81 @@ enum class states_t {
  * @brief Actions to execute after parameter processing.
  *
  */
-struct actions {
+struct program_actions {
+public:
   /// Create a new archive.
-  bool create;
+  bool create = false;
   /// Extract files from an archive.
-  bool extract;
+  bool extract = false;
   /// Overwrite existing OUTPUT without confirmation.
-  bool force;
+  bool force = false;
 
-  /// Name of `input_path`
-  std::string input_path_name;
-  /// Name of `output_path`
-  std::string output_path_name;
+  /// Name of `input_path`.
+  std::string input_path_name = "";
+  /// Name of `output_path`.
+  std::string output_path_name = "";
 
   /**
    * @brief Get the input path object
    *
    * @return fs::path
    */
-  fs::path get_input_path() { return fs::path(input_path_name); };
+  [[nodiscard]] fs::path get_input_path() const {
+    return fs::path(input_path_name);
+  };
 
   /**
    * @brief Get the output path object
    *
    * @return fs::path
    */
-  fs::path get_output_path() { return fs::path(output_path_name); };
+  [[nodiscard]] fs::path get_output_path() const {
+    return fs::path(output_path_name);
+  };
 
   /**
-   * @brief Check if path names are valid.
+   * @brief Validate actions.
    *
-   * @return true If path names are valid.
-   * @return false If path names are invalid.
+   * @param error Reference to error that will be assigned to.
+   * @return true If actions are valid.
+   * @return false If actions are invalid.
    */
-  bool has_existing_paths() {
-    return fs::exists(get_input_path()) &&
-           (fs::exists(get_output_path().parent_path()) ||
-            get_output_path() == get_output_path().root_path());
+  [[nodiscard]] bool validate(std::errc &error) const noexcept {
+    if (has_invalid_operation()) {
+      error = std::errc::operation_not_supported;
+      return false;
+    } else if (has_empty_path_name()) {
+      error = std::errc::no_such_file_or_directory;
+      return false;
+    } else if (has_invalid_paths()) {
+      error = std::errc::no_such_file_or_directory;
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * @brief Check if actions are valid.
+   *
+   * This is a simple check that will not try to handle error codes.
+   *
+   * @return true If actions are valid.
+   * @return false If actions are invalid.
+   */
+  [[nodiscard]] bool is_valid() const noexcept {
+    std::errc error;
+    return validate(error);
+  }
+
+private:
+  /**
+   * @brief Check if operation is valid.
+   *
+   * @return true If operation is valid.
+   * @return false If operation is invalid.
+   */
+  [[nodiscard]] bool has_invalid_operation() const noexcept {
+    return create && extract;
   }
 
   /**
@@ -118,49 +139,53 @@ struct actions {
    * @return true If no path name is empty.
    * @return false If any path name is empty.
    */
-  bool has_empty_path_name() {
+  [[nodiscard]] bool has_empty_path_name() const noexcept {
     return input_path_name.empty() || output_path_name.empty();
   }
 
   /**
-   * @brief Check if actions is valid.
+   * @brief Check if paths are invalid.
    *
-   * This checks for conditions that should cause the program to exit with a
-   * failure.
-   *
-   * @return true If actions are valid.
-   * @return false If actions are invalid.
+   * @return true If paths are invalid.
+   * @return false If paths are valid.
    */
-  bool is_valid() {
-    if ((create && extract) || has_empty_path_name() || !has_existing_paths()) {
-      return false;
+  [[nodiscard]] bool has_invalid_paths() const noexcept {
+    // `input_path` must exist
+    const fs::path input_path = get_input_path();
+    if (!fs::exists(input_path)) {
+      return true;
     }
-    return true;
+
+    // `output_path` parent must exist, except if output is root
+    const fs::path output_path = get_output_path();
+    const fs::path output_parent = output_path.parent_path();
+    const fs::path output_root = output_path.root_path();
+    return !fs::exists(output_parent) && !(output_parent == output_root);
   }
 };
 
 /**
  * @brief Handle copying.
  *
- * @param from INPUT path.
- * @param to OUTPUT path.
+ * @param input_path INPUT path.
+ * @param output_path OUTPUT path.
  * @param force Overwrite existing OUTPUT without confirmation.
  */
-void handle_copy(fs::path from, fs::path to, bool &force) {
-  const fs::copy_options __copy_options =
-      (fs::is_directory(to) ? fs::copy_options::recursive
-                            : fs::copy_options{}) |
+void handle_copy(fs::path input_path, fs::path output_path, bool &force) {
+  const fs::copy_options options =
+      (fs::is_directory(output_path) ? fs::copy_options::recursive
+                                     : fs::copy_options{}) |
       (force ? fs::copy_options::overwrite_existing : fs::copy_options{});
-  fs::copy(from, to, __copy_options);
+  fs::copy(input_path, output_path, options);
 }
 
 /**
  * @brief Handle archive creation.
  *
- * @param from INPUT path.
- * @param to OUTPUT path.
+ * @param input_path INPUT path.
+ * @param output_path OUTPUT path.
  */
-void handle_create(fs::path from, fs::path to) {
+void handle_create(fs::path input_path, fs::path output_path) {
   // FIXME: Implement this.
   throw std::runtime_error("FIXME: Implement this!");
 }
@@ -168,10 +193,10 @@ void handle_create(fs::path from, fs::path to) {
 /**
  * @brief Handle archive extraction.
  *
- * @param from INPUT path.
- * @param to OUTPUT path.
+ * @param input_path INPUT path.
+ * @param output_path OUTPUT path.
  */
-void handle_extract(fs::path from, fs::path to) {
+void handle_extract(fs::path input_path, fs::path output_path) {
   // FIXME: Implement this.
   throw std::runtime_error("FIXME: Implement this!");
 }
@@ -179,28 +204,34 @@ void handle_extract(fs::path from, fs::path to) {
 /**
  * @brief Handle actions.
  *
- * @param __actions Actions to execute after parameter processing.
+ * @param actions Actions to execute after parameter processing.
  * @return int Success value.
  */
-int handle_actions(actions &__actions) {
-  // Exit if actions are invalid
-  if (!__actions.is_valid()) {
-    std::cerr << PROGRAM_NAME << ":\n Invalid parameters:\n"
-              << std::format(PARAMETER_TEMPLATE, __actions.create,
-                             __actions.extract, __actions.force,
-                             __actions.input_path_name,
-                             __actions.output_path_name);
+int handle_actions(program_actions &actions) {
+  // Return error if actions are invalid
+  std::errc error;
+  if (!actions.validate(error)) {
+    std::string error_message;
+    if (error == std::errc::operation_not_supported) {
+      error_message = "Operation not supported";
+    } else if (error == std::errc::no_such_file_or_directory) {
+      error_message = "No such file or directory";
+    } else {
+      std::unreachable();
+    }
+    const std::uint8_t error_code = static_cast<uint8_t>(error);
+    std::cerr << PROGRAM_NAME << ": " << error_message << "\n";
     return EXIT_FAILURE;
   }
 
   // Execute actions
-  if (!__actions.create && !__actions.extract) {
-    handle_copy(__actions.get_input_path(), __actions.get_output_path(),
-                __actions.force);
-  } else if (__actions.create) {
-    handle_create(__actions.get_input_path(), __actions.get_output_path());
-  } else if (__actions.extract) {
-    handle_extract(__actions.get_input_path(), __actions.get_output_path());
+  if (!actions.create && !actions.extract) {
+    handle_copy(actions.get_input_path(), actions.get_output_path(),
+                actions.force);
+  } else if (actions.create) {
+    handle_create(actions.get_input_path(), actions.get_output_path());
+  } else if (actions.extract) {
+    handle_extract(actions.get_input_path(), actions.get_output_path());
   }
   return EXIT_SUCCESS;
 }
@@ -216,17 +247,17 @@ void handle_help() { std::cout << std::format(HELP_TEMPLATE, PROGRAM_NAME); }
  *
  * @param params All parameters.
  * @param param Current parameter.
- * @param __actions Actions to execute after parameter processing.
+ * @param actions Actions to execute after parameter processing.
  * @return states_t States for execution flow.
  */
-states_t state_handle_flags(std::span<char *> &params, std::string_view &param,
-                            actions &__actions) {
+states_t handle_flags(std::span<char *> &params, std::string_view &param,
+                      program_actions &actions) {
   if (param == "-c" || param == "--create") {
-    __actions.create = true;
+    actions.create = true;
   } else if (param == "-x" || param == "--extract" || param == "--get") {
-    __actions.extract = true;
+    actions.extract = true;
   } else if (param == "-f" || param == "--force") {
-    __actions.force = true;
+    actions.force = true;
   } else if (param == "-i") {
     return states_t::SET_INPUT_PATH_NAME;
   } else if (param == "-o") {
@@ -242,12 +273,12 @@ states_t state_handle_flags(std::span<char *> &params, std::string_view &param,
  * @brief Set `input_path_name`.
  *
  * @param param Current parameter.
- * @param __actions Actions to execute after parameter processing.
+ * @param actions Actions to execute after parameter processing.
  * @return states_t States for execution flow.
  */
-states_t state_set_input_path_name(std::string_view &param,
-                                   actions &__actions) {
-  __actions.input_path_name = param;
+states_t set_input_path_name(std::string_view &param,
+                             program_actions &actions) {
+  actions.input_path_name = param;
   return states_t::HANDLE_FLAG;
 }
 
@@ -255,12 +286,12 @@ states_t state_set_input_path_name(std::string_view &param,
  * @brief Set `output_path_name`.
  *
  * @param param Current parameter.
- * @param __actions Actions to execute after parameter processing.
+ * @param actions Actions to execute after parameter processing.
  * @return states_t States for execution flow.
  */
-states_t state_set_output_path_name(std::string_view &param,
-                                    actions &__actions) {
-  __actions.output_path_name = param;
+states_t set_output_path_name(std::string_view &param,
+                              program_actions &actions) {
+  actions.output_path_name = param;
   return states_t::HANDLE_FLAG;
 }
 
@@ -281,13 +312,7 @@ states_t state_set_output_path_name(std::string_view &param,
  */
 int main(int argc, char *argv[]) {
   // Initialize actions, states_t and params
-  actions __actions = {
-      .create = false,
-      .extract = false,
-      .force = false,
-      .input_path_name = "",
-      .output_path_name = "",
-  };
+  program_actions actions;
   states_t state = states_t::HANDLE_FLAG;
   std::span<char *> params{argv, static_cast<uint32_t>(argc)};
 
@@ -300,20 +325,19 @@ int main(int argc, char *argv[]) {
     // Switch on state
     switch (state) {
     case states_t::HANDLE_FLAG: {
-      state = state_handle_flags(params, param, __actions);
-    } break;
+      state = handle_flags(params, param, actions);
+      break;
+    }
     case states_t::SET_INPUT_PATH_NAME: {
-      state = state_set_input_path_name(param, __actions);
-    } break;
+      state = set_input_path_name(param, actions);
+      break;
+    }
     case states_t::SET_OUTPUT_PATH_NAME: {
-      state = state_set_output_path_name(param, __actions);
-    } break;
-    default: {
-      std::unreachable();
+      state = set_output_path_name(param, actions);
       break;
     }
     }
   }
   // Return success value of `handle_actions()`
-  return handle_actions(__actions);
+  return handle_actions(actions);
 }
