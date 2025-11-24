@@ -35,6 +35,32 @@ public:
   std::string_view output_path_name = "";
 
   /**
+   * @brief Execute actions
+   *
+   * @return int Success value
+   */
+  [[nodiscard]] int run();
+
+private:
+  /**
+   * @brief Handle copying
+   *
+   */
+  void handle_copy();
+
+  /**
+   * @brief Handle archive creation
+   *
+   */
+  void handle_create();
+
+  /**
+   * @brief Handle archive extraction
+   *
+   */
+  void handle_extract();
+
+  /**
    * @brief Get the input path object
    *
    * @return fs::path
@@ -48,23 +74,6 @@ public:
    */
   [[nodiscard]] fs::path get_output_path() const;
 
-  /**
-   * @brief Execute actions
-   *
-   * @return int Success value
-   */
-  [[nodiscard]] int run();
-
-  /**
-   * @brief Validate actions
-   *
-   * @param error Reference to error that this will assign to
-   * @return true If actions are valid
-   * @return false If actions are invalid
-   */
-  [[nodiscard]] bool validate(std::errc &error) const noexcept;
-
-private:
   /**
    * @brief Check if operation is valid
    *
@@ -88,6 +97,15 @@ private:
    * @return false If paths are valid
    */
   [[nodiscard]] bool has_invalid_paths() const noexcept;
+
+  /**
+   * @brief Validate actions
+   *
+   * @param error Reference to error that this will assign to
+   * @return true If actions are valid
+   * @return false If actions are invalid
+   */
+  [[nodiscard]] bool validate(std::errc &error) const noexcept;
 };
 
 }; // namespace actions
