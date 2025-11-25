@@ -18,9 +18,9 @@ namespace {
  *
  */
 constexpr std::string_view HELP_TEMPLATE =
-    "Compress or decompress the INPUT file or directory.\n"
-    "If neither is present, the INPUT file or directory will be copied "
-    "recursively.\n\n"
+    "Create or extract an archive from the INPUT path.\n"
+    "If neither create or extract flag are present, the object at INPUT path "
+    "will be copied recursively.\n\n"
     "Usage: {}"
     " [OPTION...] [-i INPUT] [-o OUTPUT]\n\n"
     "Options:\n"
@@ -28,8 +28,7 @@ constexpr std::string_view HELP_TEMPLATE =
     " -x, --extract, --get    Extract files from an archive.\n"
     " -f, --force             Overwrite existing OUTPUT, otherwise this is "
     "skipped.\n"
-    " -i INPUT                Read input from a single file or directory, "
-    "INPUT.\n"
+    " -i INPUT                Read input from a single path, INPUT.\n"
     " -o OUTPUT               Write output to a single file, OUTPUT.\n"
     " -h                      Display usage and exit.\n";
 
