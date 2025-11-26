@@ -25,10 +25,11 @@
  * @return int Success value
  */
 int main(int argc, char *argv[]) {
-  // Parse cli arguments and run operation
+  // Parse cli arguments
   std::span<char *> args{argv, static_cast<uint32_t>(argc)};
   cli::arg_parser parser(args);
-
   parser.parse();
+
+  // Return success value of execution of operation
   return parser.operation.execute();
 }

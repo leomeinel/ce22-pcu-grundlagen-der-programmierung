@@ -17,7 +17,7 @@ namespace filesystem {
 
 /// @copydoc fs_operation::execute()
 [[nodiscard]] int fs_operation::execute() {
-  // Return error if operation is invalid
+  // Throw error if operation is invalid
   std::errc error;
   if (!this->validate(error)) {
     const std::system_error sys_error =
@@ -26,13 +26,16 @@ namespace filesystem {
   }
 
   // Run operation
-  if (!this->create && !this->extract) {
-    this->handle_copy();
-  } else if (this->create) {
-    this->handle_create();
-  } else if (this->extract) {
-    this->handle_extract();
+  const bool &create_ = this->create;
+  const bool &extract_ = this->extract;
+  if (!create_ && !extract_) {
+    this->copy();
+  } else if (create_) {
+    this->create_archive();
+  } else if (extract_) {
+    this->extract_archive();
   }
+
   return EXIT_SUCCESS;
 }
 
@@ -40,47 +43,49 @@ namespace filesystem {
  * fs_operation private:
  */
 
-/// @copydoc fs_operation::handle_copy()
-void fs_operation::handle_copy() {
+/// @copydoc fs_operation::copy()
+void fs_operation::copy() {
+  // Copy file with specific options
+  const fs::path &input_path_ = this->input_path;
+  const fs::path &output_path_ = this->output_path;
+  const bool &force_ = this->force;
   const fs::copy_options options =
-      (fs::is_directory(this->output_path) ? fs::copy_options::recursive
-                                           : fs::copy_options{}) |
-      (this->force ? fs::copy_options::overwrite_existing : fs::copy_options{});
-  fs::copy(this->input_path, this->output_path, options);
+      (fs::is_directory(output_path_) ? fs::copy_options::recursive
+                                      : fs::copy_options{}) |
+      (force_ ? fs::copy_options::overwrite_existing : fs::copy_options{});
+  fs::copy(input_path_, output_path_, options);
 }
 
-/// @copydoc fs_operation::handle_create()
-void fs_operation::handle_create() {
+/// @copydoc fs_operation::create_archive()
+void fs_operation::create_archive() {
   // FIXME: Implement this
   throw std::runtime_error("FIXME: Implement this");
 }
 
-/// @copydoc fs_operation::handle_extract()
-void fs_operation::handle_extract() {
+/// @copydoc fs_operation::extract_archive()
+void fs_operation::extract_archive() {
   // FIXME: Implement this
   throw std::runtime_error("FIXME: Implement this");
 }
 
-/// @copydoc fs_operation::has_invalid_operation()
+/// @copydoc fs_operation::has_incompatible_flags()
 [[nodiscard]] bool fs_operation::has_incompatible_flags() const noexcept {
   return this->create && this->extract;
 }
 
-/// @copydoc fs_operation::has_invalid_paths()
+/// @copydoc fs_operation::has_invalid_path()
 [[nodiscard]] bool fs_operation::has_invalid_path() const noexcept {
-  // path cannot be empty
-  if (this->input_path.empty() || this->output_path.empty()) {
+  const fs::path &input_path_ = this->input_path;
+  const fs::path &output_path_ = this->output_path;
+
+  // paths cannot be empty and input path must exist
+  if (input_path_.empty() || output_path_.empty() || !fs::exists(input_path_)) {
     return true;
   }
 
-  // `input_path` must exist
-  if (!fs::exists(this->input_path)) {
-    return true;
-  }
-
-  // `output_path` parent must exist, except if output is root
-  const fs::path output_parent = this->output_path.parent_path();
-  const fs::path output_root = this->output_path.root_path();
+  // parent of ouput path must exist, except if output path is root
+  const fs::path output_parent = output_path_.parent_path();
+  const fs::path output_root = output_path_.root_path();
   return !fs::exists(output_parent) && !(output_parent == output_root);
 }
 

@@ -45,7 +45,7 @@ public:
    *
    * @param args_ cli arguments
    */
-  arg_parser(std::span<char *> &args_) { this->args = args_; }
+  arg_parser(std::span<char *> &args_);
 
 private:
   /**
@@ -55,9 +55,9 @@ private:
   enum class parsing_state {
     /// Handle flag
     handle_flag,
-    /// Expect `input_path` in the next step
+    /// Expect input path in the next step
     expect_input_path,
-    /// Expect `output_path` in the next step
+    /// Expect output path in the next step
     expect_output_path
   };
 
@@ -81,18 +81,18 @@ private:
   parsing_state parse_flag();
 
   /**
-   * @brief Set the input path object
+   * @brief Parse the input path
    *
    * @return parsing_state State tracking object
    */
-  parsing_state set_input_path();
+  parsing_state parse_input_path();
 
   /**
-   * @brief Set the output path object
+   * @brief Parse the output path
    *
    * @return parsing_state State tracking object
    */
-  parsing_state set_output_path();
+  parsing_state parse_output_path();
 };
 
 }; // namespace cli

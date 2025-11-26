@@ -25,14 +25,14 @@ struct fs_operation {
 public:
   /// Create a new archive
   bool create = false;
-  /// Extract files from an archive
+  /// Extract an archive
   bool extract = false;
-  /// Overwrite existing OUTPUT without confirmation
+  /// Overwrite existing output path without confirmation
   bool force = false;
 
-  /// INPUT path
+  /// Input path
   fs::path input_path;
-  /// OUTPUT path
+  /// Output path
   fs::path output_path;
 
   /**
@@ -44,22 +44,22 @@ public:
 
 private:
   /**
-   * @brief Handle copying
+   * @brief Copy object
    *
    */
-  void handle_copy();
+  void copy();
 
   /**
-   * @brief Handle archive creation
+   * @brief Create a new archive
    *
    */
-  void handle_create();
+  void create_archive();
 
   /**
-   * @brief Handle archive extraction
+   * @brief Extract an archive
    *
    */
-  void handle_extract();
+  void extract_archive();
 
   /**
    * @brief Check if incompatible flags are present
@@ -80,7 +80,7 @@ private:
   /**
    * @brief Validate operation
    *
-   * @param error Reference to error that this will assign to
+   * @param error Reference to error that this might assign to
    * @return true If operation is valid
    * @return false If operation is invalid
    */
