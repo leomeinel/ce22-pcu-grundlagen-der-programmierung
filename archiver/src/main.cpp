@@ -7,8 +7,7 @@
  * URL: https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#include "../include/actions.hpp"
-#include "../include/state.hpp"
+#include "../include/operation.hpp"
 
 /**
  * @brief Main class
@@ -26,33 +25,10 @@
  * @return int Success value
  */
 int main(int argc, char *argv[]) {
-  // Initialize actions, exec_state and params
-  actions::param_actions actions;
-  state::exec_state state = state::exec_state::HANDLE_FLAG;
-  std::span<char *> params{argv, static_cast<uint32_t>(argc)};
+  // Parse cli arguments and run operation
+  std::span<char *> args{argv, static_cast<uint32_t>(argc)};
+  cli::arg_parser parser(args);
 
-  // Loop through params
-  for (std::string_view param : params) {
-    // Skip first param if others exist
-    if (param == params[0] && params.size() > 1) {
-      continue;
-    }
-    // Switch on state
-    switch (state) {
-    case state::exec_state::HANDLE_FLAG: {
-      state = state::handle_flags(params, param, actions);
-      break;
-    }
-    case state::exec_state::SET_INPUT_PATH_NAME: {
-      state = state::set_input_path_name(param, actions);
-      break;
-    }
-    case state::exec_state::SET_OUTPUT_PATH_NAME: {
-      state = state::set_output_path_name(param, actions);
-      break;
-    }
-    }
-  }
-  // Return success value of `actions.run()`
-  return actions.run();
+  parser.parse();
+  return parser.operation.execute();
 }

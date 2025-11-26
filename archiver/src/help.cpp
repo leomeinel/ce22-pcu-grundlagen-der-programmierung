@@ -36,11 +36,8 @@ constexpr std::string_view HELP_TEMPLATE =
 
 namespace help {
 
-/**
- * @brief Handle help
- *
- */
-void handle_help() {
+/// @copydoc print_help()
+void print_help() {
   std::cout << std::format(HELP_TEMPLATE, program::PROGRAM_NAME);
 }
 

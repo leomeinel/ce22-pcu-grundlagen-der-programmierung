@@ -13,10 +13,10 @@
 namespace help {
 
 /**
- * @brief Handle help
+ * @brief Print help
  *
  */
-void handle_help();
+void print_help();
 
 }; // namespace help
 
