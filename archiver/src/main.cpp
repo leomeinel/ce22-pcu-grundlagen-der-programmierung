@@ -8,7 +8,7 @@
  */
 
 #include "../include/actions.hpp"
-#include "../include/states.hpp"
+#include "../include/state.hpp"
 
 /**
  * @brief Main class
@@ -26,9 +26,9 @@
  * @return int Success value
  */
 int main(int argc, char *argv[]) {
-  // Initialize actions, exec_states and params
+  // Initialize actions, exec_state and params
   actions::param_actions actions;
-  states::exec_states state = states::exec_states::HANDLE_FLAG;
+  state::exec_state state = state::exec_state::HANDLE_FLAG;
   std::span<char *> params{argv, static_cast<uint32_t>(argc)};
 
   // Loop through params
@@ -39,16 +39,16 @@ int main(int argc, char *argv[]) {
     }
     // Switch on state
     switch (state) {
-    case states::exec_states::HANDLE_FLAG: {
-      state = states::handle_flags(params, param, actions);
+    case state::exec_state::HANDLE_FLAG: {
+      state = state::handle_flags(params, param, actions);
       break;
     }
-    case states::exec_states::SET_INPUT_PATH_NAME: {
-      state = states::set_input_path_name(param, actions);
+    case state::exec_state::SET_INPUT_PATH_NAME: {
+      state = state::set_input_path_name(param, actions);
       break;
     }
-    case states::exec_states::SET_OUTPUT_PATH_NAME: {
-      state = states::set_output_path_name(param, actions);
+    case state::exec_state::SET_OUTPUT_PATH_NAME: {
+      state = state::set_output_path_name(param, actions);
       break;
     }
     }

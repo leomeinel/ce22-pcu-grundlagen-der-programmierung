@@ -1,5 +1,5 @@
 /*
- * File: states.hpp
+ * File: state.hpp
  * Author: Leopold Johannes Meinel (leo@meinel.dev)
  * -----
  * Copyright (c) 2025 Leopold Johannes Meinel & contributors
@@ -7,18 +7,18 @@
  * URL: https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#ifndef STATES_HPP
-#define STATES_HPP
+#ifndef STATE_HPP
+#define STATE_HPP
 
 #include "actions.hpp"
 
-namespace states {
+namespace state {
 
 /**
- * @brief States for execution flow
+ * @brief state for execution flow
  *
  */
-enum class exec_states {
+enum class exec_state {
   /// Handle flag
   HANDLE_FLAG,
   /// Handle `input_path_name` in next step
@@ -33,32 +33,32 @@ enum class exec_states {
  * @param params All parameters
  * @param param Current parameter
  * @param actions  Actions to execute after parameter processing
- * @return exec_states
+ * @return exec_state
  */
-[[nodiscard]] exec_states handle_flags(std::span<char *> &params,
-                                       std::string_view &param,
-                                       actions::param_actions &actions);
+[[nodiscard]] exec_state handle_flags(std::span<char *> &params,
+                                      std::string_view &param,
+                                      actions::param_actions &actions);
 
 /**
  * @brief Set the input path name object
  *
  * @param target Target value for input path name object
  * @param actions Actions to execute after parameter processing
- * @return exec_states
+ * @return exec_state
  */
-[[nodiscard]] exec_states set_input_path_name(std::string_view &target,
-                                              actions::param_actions &actions);
+[[nodiscard]] exec_state set_input_path_name(std::string_view &target,
+                                             actions::param_actions &actions);
 
 /**
  * @brief Set the output path name object
  *
  * @param target Target value for output path name object
  * @param actions Actions to execute after parameter processing
- * @return exec_states States for execution flow
+ * @return exec_state state for execution flow
  */
-[[nodiscard]] exec_states set_output_path_name(std::string_view &target,
-                                               actions::param_actions &actions);
+[[nodiscard]] exec_state set_output_path_name(std::string_view &target,
+                                              actions::param_actions &actions);
 
-}; // namespace states
+}; // namespace state
 
 #endif
