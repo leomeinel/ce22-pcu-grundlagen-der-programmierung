@@ -88,7 +88,7 @@ void fs_operation::handle_extract() {
   return !fs::exists(output_parent) && !(output_parent == output_root);
 }
 
-/// @copydoc fs_operation::validate(std::errc)
+/// @copydoc fs_operation::validate(std::errc &)
 [[nodiscard]] bool fs_operation::validate(std::errc &error) const noexcept {
   if (this->has_incompatible_flags()) {
     error = std::errc::operation_not_supported;
