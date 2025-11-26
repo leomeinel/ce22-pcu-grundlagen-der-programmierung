@@ -16,8 +16,7 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 set(SOURCES
     src/main.cpp
     src/cli.cpp
-    src/help.cpp
-    include/program.hpp
+    src/filesystem.cpp
 )
 
 # Add executable
