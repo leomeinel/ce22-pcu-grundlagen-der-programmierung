@@ -1,5 +1,5 @@
 /*
- * File: operation.hpp
+ * File: cli.hpp
  * Author: Leopold Johannes Meinel (leo@meinel.dev)
  * -----
  * Copyright (c) 2025 Leopold Johannes Meinel & contributors
@@ -7,8 +7,8 @@
  * URL: https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#ifndef OPERATION_HPP
-#define OPERATION_HPP
+#ifndef CLI_HPP
+#define CLI_HPP
 
 #include <filesystem>
 
