@@ -1,5 +1,5 @@
 /*
- * File: operation.cpp
+ * File: cli.cpp
  * Author: Leopold Johannes Meinel (leo@meinel.dev)
  * -----
  * Copyright (c) 2025 Leopold Johannes Meinel & contributors
@@ -7,7 +7,7 @@
  * URL: https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#include "../include/operation.hpp"
+#include "../include/cli.hpp"
 #include "../include/help.hpp"
 #include <cstdlib>
 #include <ranges>

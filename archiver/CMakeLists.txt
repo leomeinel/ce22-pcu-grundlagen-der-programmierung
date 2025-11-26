@@ -15,7 +15,7 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 # Set target and sources
 set(SOURCES
     src/main.cpp
-    src/operation.cpp
+    src/cli.cpp
     src/help.cpp
     include/program.hpp
 )
