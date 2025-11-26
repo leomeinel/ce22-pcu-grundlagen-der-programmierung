@@ -54,15 +54,14 @@ void print_help() { std::cout << std::format(HELP_TEMPLATE, PROGRAM_NAME); }
 /// @copydoc arg_parser::parse()
 void arg_parser::parse() {
   // If at max one cli argument, print help and exit
-  const std::span<char *> &args_ = this->args;
-  if (args_.size() <= 1) {
+  if (this->args.size() <= 1) {
     cli::print_help();
     exit(EXIT_SUCCESS);
   }
 
   // Loop through cli arguments, except first
   parsing_state current_state = parsing_state::handle_flag;
-  for (std::string_view arg : std::ranges::views::drop(args_, 1)) {
+  for (std::string_view arg : std::ranges::views::drop(this->args, 1)) {
     this->current_arg = arg;
 
     switch (current_state) {
@@ -92,18 +91,16 @@ arg_parser::arg_parser(std::span<char *> &args_) { this->args = args_; }
 /// @copydoc arg_parser::parse_flag()
 [[nodiscard]] arg_parser::parsing_state arg_parser::parse_flag() {
   // Assign to operation members or return state or print help and exit
-  const std::string_view &current_arg_ = this->current_arg;
-  filesystem::fs_operation &operation_ = this->operation;
-  if (current_arg_ == "-c" || current_arg_ == "--create") {
-    operation_.create = true;
-  } else if (current_arg_ == "-x" || current_arg_ == "--extract" ||
-             current_arg_ == "--get") {
-    operation_.extract = true;
-  } else if (current_arg_ == "-f" || current_arg_ == "--force") {
-    operation_.force = true;
-  } else if (current_arg_ == "-i") {
+  if (this->current_arg == "-c" || this->current_arg == "--create") {
+    this->operation.create = true;
+  } else if (this->current_arg == "-x" || this->current_arg == "--extract" ||
+             this->current_arg == "--get") {
+    this->operation.extract = true;
+  } else if (this->current_arg == "-f" || this->current_arg == "--force") {
+    this->operation.force = true;
+  } else if (this->current_arg == "-i") {
     return parsing_state::expect_input_path;
-  } else if (current_arg_ == "-o") {
+  } else if (this->current_arg == "-o") {
     return parsing_state::expect_output_path;
   } else {
     cli::print_help();
@@ -116,9 +113,7 @@ arg_parser::arg_parser(std::span<char *> &args_) { this->args = args_; }
 /// @copydoc arg_parser::parse_input_path()
 [[nodiscard]] arg_parser::parsing_state arg_parser::parse_input_path() {
   // Set input path and return state
-  const std::string_view &current_arg_ = this->current_arg;
-  filesystem::fs_operation &operation_ = this->operation;
-  operation_.input_path = fs::path(current_arg_);
+  this->operation.input_path = fs::path(this->current_arg);
 
   return parsing_state::handle_flag;
 }
@@ -126,9 +121,7 @@ arg_parser::arg_parser(std::span<char *> &args_) { this->args = args_; }
 /// @copydoc arg_parser::parse_output_path()
 [[nodiscard]] arg_parser::parsing_state arg_parser::parse_output_path() {
   // Set output path and return state
-  const std::string_view &current_arg_ = this->current_arg;
-  filesystem::fs_operation &operation_ = this->operation;
-  operation_.output_path = fs::path(current_arg_);
+  this->operation.output_path = fs::path(this->current_arg);
 
   return parsing_state::handle_flag;
 }
