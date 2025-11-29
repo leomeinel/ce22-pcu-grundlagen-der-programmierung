@@ -35,6 +35,6 @@ target_compile_options(${PROJECT_NAME} PRIVATE -march=native)
 
 add_custom_command(
   TARGET "${PROJECT_NAME}" POST_BUILD
-  COMMAND $<$<CONFIG:release>:${CMAKE_STRIP}>
+  COMMAND $<$<CONFIG:Release>:${CMAKE_STRIP}>
   ARGS -s $<TARGET_FILE:${PROJECT_NAME}>
 )
