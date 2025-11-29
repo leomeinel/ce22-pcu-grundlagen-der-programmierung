@@ -24,4 +24,5 @@ if [[ -z "${1}" ]]; then
 else
     cmake -D CMAKE_BUILD_TYPE=Debug "${SCRIPT_DIR}"
 fi
+cmake -D CMAKE_CXX_COMPILER=clang++ "${SCRIPT_DIR}"
 cmake --build "${SCRIPT_DIR}"/build

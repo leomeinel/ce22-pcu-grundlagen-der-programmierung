@@ -27,9 +27,6 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 string(REPLACE "_" "-" OUTPUT_NAME "${PROJECT_NAME}")
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${OUTPUT_NAME}")
 
-# Specify required features for compiling
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
-
 # Add include directories
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
