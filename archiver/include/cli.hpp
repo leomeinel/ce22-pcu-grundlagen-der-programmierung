@@ -10,91 +10,112 @@
 #ifndef CLI_HPP
 #define CLI_HPP
 
-#include "filesystem.hpp"
 #include <span>
 #include <string_view>
 
-namespace cli {
+#include "filesystem.hpp"
 
-/**
- * @brief Print help
- *
- */
-void print_help();
-
-/**
- * @brief Argument parser
- *
- */
-struct arg_parser {
-public:
-  /**
-   * @brief Operation to execute on filesystem
-   *
-   */
-  filesystem::fs_operation operation;
+namespace cli
+{
 
   /**
-   * @brief Parse args and initialize operation
+   * @brief Print help
    *
    */
-  void parse();
+  void print_help();
 
   /**
-   * @brief Construct a new arg parser object
-   *
-   * @param args_ cli arguments
-   */
-  arg_parser(std::span<char *> &args_);
-
-private:
-  /**
-   * @brief State tracking object
+   * @brief Alignment of `arg_parser`
    *
    */
-  enum class parsing_state {
-    /// Handle flag
-    handle_flag,
-    /// Expect input path in the next step
-    expect_input_path,
-    /// Expect output path in the next step
-    expect_output_path
-  };
+  inline constexpr uint8_t ALIGNMENT_ARG_PARSER = 128;
 
   /**
-   * @brief cli arguments
+   * @brief Argument parser
    *
    */
-  std::span<char *> args;
+  class arg_parser
+  {
+   public:
+    /**
+     * @brief Get the operation object
+     *
+     * @return const filesystem::fs_operation&
+     */
+    [[nodiscard]] filesystem::fs_operation& get_operation() &
+    {
+      return operation;
+    }
 
-  /**
-   * @brief Current iteration of cli arguments
-   *
-   */
-  std::string_view current_arg;
+    /**
+     * @brief Parse args and initialize operation
+     *
+     */
+    void parse();
 
-  /**
-   * @brief Parse flag
-   *
-   * @return parsing_state State tracking object
-   */
-  parsing_state parse_flag();
+    /**
+     * @brief Construct a new arg parser object
+     *
+     * @param args_ cli arguments
+     */
+    explicit arg_parser(std::span<char*>& args_);
 
-  /**
-   * @brief Parse the input path
-   *
-   * @return parsing_state State tracking object
-   */
-  parsing_state parse_input_path();
+   private:
+    /**
+     * @brief State tracking object
+     *
+     */
+    enum class parsing_state : std::uint8_t
+    {
+      /// Handle flag
+      handle_flag,
+      /// Expect input path in the next step
+      expect_input_path,
+      /// Expect output path in the next step
+      expect_output_path
+    };
 
-  /**
-   * @brief Parse the output path
-   *
-   * @return parsing_state State tracking object
-   */
-  parsing_state parse_output_path();
-};
+    /**
+     * @brief cli arguments
+     *
+     */
+    std::span<char*> args;
 
-}; // namespace cli
+    /**
+     * @brief Current iteration of cli arguments
+     *
+     */
+    std::string_view current_arg;
+
+    /**
+     * @brief Operation to execute on filesystem
+     *
+     */
+    filesystem::fs_operation operation;
+
+    /**
+     * @brief Parse flag
+     *
+     * @return parsing_state State tracking object
+     */
+    parsing_state parse_flag();
+
+    /**
+     * @brief Parse the input path
+     *
+     * @return parsing_state State tracking object
+     */
+    parsing_state parse_input_path();
+
+    /**
+     * @brief Parse the output path
+     *
+     * @return parsing_state State tracking object
+     */
+    parsing_state parse_output_path();
+
+  } __attribute__((aligned(ALIGNMENT_ARG_PARSER)));
+
+};  // namespace cli
 
 #endif
