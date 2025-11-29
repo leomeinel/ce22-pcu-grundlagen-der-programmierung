@@ -11,7 +11,7 @@
 # Fail on error
 set -e
 
-# Source config
+# Set ${SCRIPT_DIR}
 SCRIPT_DIR="$(dirname -- "$(readlink -f -- "${0}")")"
 
 # Out of source build
