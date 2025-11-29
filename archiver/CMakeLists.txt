@@ -22,6 +22,10 @@ set(SOURCES
 # Add executable
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+# Use kebab-case for OUTPUT_NAME
+string(REPLACE "_" "-" OUTPUT_NAME "${PROJECT_NAME}")
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${OUTPUT_NAME}")
+
 # Specify required features for compiling
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
 
