@@ -13,8 +13,9 @@
 int main(int /*argc*/, char* /*argv*/[])
 {
   // Using C std
-  // NOLINTNEXTLINE
+  // NOLINTBEGIN(modernize-use-std-print, cppcoreguidelines-pro-type-vararg, hicpp-vararg)
   std::printf("Hello World\n");
+  // NOLINTEND(modernize-use-std-print, cppcoreguidelines-pro-type-vararg, hicpp-vararg)
   // Using C++ std
   std::cout << "Hello World\n";
   return 0;

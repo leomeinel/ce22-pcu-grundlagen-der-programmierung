@@ -58,7 +58,7 @@ namespace filesystem
   }
 
   /// @copydoc fs_operation::create_archive()
-  // NOLINTNEXTLINE
+  // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
   void fs_operation::create_archive() const
   {
     // FIXME: Implement this
@@ -66,7 +66,7 @@ namespace filesystem
   }
 
   /// @copydoc fs_operation::extract_archive()
-  // NOLINTNEXTLINE
+  // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
   void fs_operation::extract_archive() const
   {
     // FIXME: Implement this
