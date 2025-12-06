@@ -1,4 +1,5 @@
-# Source: https://github.com/filipdutescu/modern-cpp-template
+# Heavily inspired by: https://github.com/filipdutescu/modern-cpp-template
+
 Checks: "*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvm-*,-llvmlibc-*"
 CheckOptions:
   [
